@@ -111,8 +111,23 @@ const imageGroupFor = (item) => {
   return onlineFoodImages.chicken;
 };
 
+const exactImageByName = {
+  'Veg Biryani': 'https://media-assets.swiggy.com/swiggy/image/upload/f_auto,q_auto,fl_lossy/RX_THUMBNAIL/IMAGES/VENDOR/2026/1/14/a1b4290a-2b6d-418a-aba8-be4e7ed15a2b_1304406.jpg',
+  'Paneer Biryani': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=85',
+  'Egg Biryani': 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,e_grayscale,c_fit/5e5b691930beefd542889cabb261aaf0',
+  'Chicken Dum Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85',
+  'Chicken Fry Piece Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85',
+  'Chicken Boneless Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85',
+  'Chicken Lollipop Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85',
+  'Mutton Dum Biryani': 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=85',
+  'Mutton Fry Piece Biryani': 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=85',
+  'Special Chicken Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85'
+};
+
 meghanaMenu.forEach((item, index) => {
   const group = imageGroupFor(item);
-  item.image = Array.isArray(group) ? group[index % group.length] : group;
+  // Exact dish mappings take priority; category defaults only cover items
+  // that do not yet have a dedicated photo.
+  item.image = exactImageByName[item.name] || (Array.isArray(group) ? group[index % group.length] : group);
 });
 
