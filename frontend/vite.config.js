@@ -10,13 +10,8 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api': {
-        target: {
-          socketPath: '/tmp/savor.sock'
-        },
-        changeOrigin: false,
-        headers: {
-          host: 'localhost'
-        }
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true
       }
     }
   }

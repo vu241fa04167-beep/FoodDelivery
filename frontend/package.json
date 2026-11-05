@@ -1,5 +1,5 @@
 {
-  "name": "savor-frontend",
+  "name": "quickbite-frontend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -9,14 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "lucide-react": "^1.16.0",
+    "axios": "^1.21.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "vite": "^6.1.0"
+    "react-router-dom": "^7.18.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
-    "tailwindcss": "^4.0.0"
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.0.0",
+    "vite": "^6.1.0"
   }
 }

@@ -1,207 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --color-ink: #17211d;
-  --color-ink-muted: #66706b;
-  --color-savor-cream: #fbfaf7;
-  --color-savor-surface: #f7f6f1;
-  --color-savor-line: #e7e9e6;
-  --color-savor-green: #195c45;
-  --color-savor-green-dark: #124534;
-  --color-savor-green-light: #e6efe8;
-  --color-savor-orange: #ef6b42;
-  --color-savor-orange-dark: #d85730;
-  --color-savor-orange-light: #fdf1ec;
-}
-
-:root {
-  color-scheme: light;
+  --color-primary: #FC8019;
+  --color-primary-hover: #e57315;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-savor-cream);
-  color: var(--color-ink);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-color: #fff8ef;
+  background-image: linear-gradient(rgba(255, 248, 239, 0.94), rgba(255, 248, 239, 0.94)), url('/images/foods/chicken-dum-biryani.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  color: #1f2937;
+  margin: 0;
+  padding: 0;
 }
 
-h1, h2, h3, .font-serif {
-  font-family: var(--font-serif);
-  letter-spacing: -0.015em;
-}
-
-/* Custom smooth scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f7f6f1;
-}
-::-webkit-scrollbar-thumb {
-  background: #dcdfdc;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #b5bab5;
-}
-
-/* Base typography helpers */
-.page-title {
-  font-family: var(--font-serif);
-  font-size: 1.875rem; /* 30px */
-  line-height: 2.25rem;
-  font-weight: 700;
-  color: #17211d;
-}
-
-@media (min-width: 640px) {
-  .page-title {
-    font-size: 2rem; /* 32px */
-    line-height: 2.375rem;
-  }
-}
-
-.section-title {
-  font-family: var(--font-serif);
-  font-size: 1.375rem; /* 22px */
-  line-height: 1.75rem;
-  font-weight: 700;
-  color: #17211d;
-}
-
-@media (min-width: 640px) {
-  .section-title {
-    font-size: 1.5rem; /* 24px */
-    line-height: 2rem;
-  }
-}
-
-.eyebrow {
-  font-size: 0.6875rem; /* 11px */
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #ef6b42;
-}
-
-/* Design System Utilities */
-.savor-card {
-  background-color: #ffffff;
-  border: 1px solid #e7e9e6;
-  border-radius: 1rem; /* 16px */
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.savor-input {
-  width: 100%;
-  border-radius: 0.75rem; /* 12px */
-  border: 1px solid #e7e9e6;
-  background-color: #ffffff;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.875rem; /* 14px */
-  color: #17211d;
-  transition: all 0.15s ease-in-out;
-}
-.savor-input:focus {
-  outline: none;
-  border-color: #195c45;
-  box-shadow: 0 0 0 3px rgba(25, 92, 69, 0.08);
-}
-.savor-input::placeholder {
-  color: #9ca3af;
-}
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 0.75rem;
-  background-color: #195c45;
-  padding: 0.625rem 1.125rem;
-  font-size: 0.8125rem; /* 13px */
-  font-weight: 600;
-  color: #ffffff;
-  transition: all 0.15s ease-in-out;
-}
-.btn-primary:hover {
-  background-color: #124534;
-}
-.btn-primary:active {
-  transform: scale(0.98);
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid #e7e9e6;
-  background-color: #ffffff;
-  padding: 0.625rem 1.125rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #17211d;
-  transition: all 0.15s ease-in-out;
-}
-.btn-secondary:hover {
-  background-color: #f7f6f1;
-  border-color: #d1d5db;
-}
-.btn-secondary:active {
-  transform: scale(0.98);
-}
-
-.btn-accent {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 0.75rem;
-  background-color: #ef6b42;
-  padding: 0.625rem 1.125rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #ffffff;
-  transition: all 0.15s ease-in-out;
-}
-.btn-accent:hover {
-  background-color: #d85730;
-}
-.btn-accent:active {
-  transform: scale(0.98);
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.85; }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-slide-down {
-  animation: slideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-pulse-glow {
-  animation: pulseGlow 2.2s infinite ease-in-out;
+.app-shell {
+  background: linear-gradient(180deg, rgba(255, 250, 245, 0.95) 0%, rgba(255, 255, 255, 0.9) 42%, rgba(255, 248, 239, 0.95) 100%);
 }
