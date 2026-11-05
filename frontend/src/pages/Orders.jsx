@@ -21,7 +21,11 @@ export default function Orders() {
         const res = await api.get('/orders/mine');
         setOrders(res.data);
       } catch (err) {
-        setError(err.isAuthError ? 'Your session could not be verified. Please retry, or sign in again if the problem continues.' : 'Failed to fetch your orders. Please try again.');
+        if (err.isAuthError) {
+          navigate('/login?redirect=/orders');
+          return;
+        }
+        setError('Failed to fetch your orders. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -60,9 +64,7 @@ export default function Orders() {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
         <p className="text-sm text-red-600 mb-3">{error}</p>
-        <button type="button" onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-white text-xs font-bold rounded">
-          Retry
-        </button>
+        <div className="flex justify-center gap-2"><button type="button" onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-white text-xs font-bold rounded">Retry</button><Link to="/login?redirect=/orders" className="px-4 py-2 border border-primary text-primary text-xs font-bold rounded">Sign in again</Link></div>
       </div>
     );
   }

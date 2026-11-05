@@ -11,7 +11,7 @@ export default function CartSidebar() {
       <div className="bg-white border border-gray-200 rounded p-6 text-center shadow-xs">
         <h3 className="font-bold text-gray-800 text-base mb-1">Cart Empty</h3>
         <p className="text-xs text-gray-500 mb-4">
-          Good food is always cooking! Add items from the menu to start your order.
+          Your order will appear here as you add items.
         </p>
         <div className="w-16 h-1 bg-gray-100 mx-auto rounded" />
       </div>

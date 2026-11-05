@@ -38,6 +38,10 @@ export default function Checkout() {
       clearCart();
       navigate(`/orders/${res.data.order._id}`);
     } catch (err) {
+      if (err.isAuthError) {
+        navigate('/login?redirect=/checkout');
+        return;
+      }
       alert(err.response?.data?.message || 'Failed to place order');
     } finally {
       setLoading(false);

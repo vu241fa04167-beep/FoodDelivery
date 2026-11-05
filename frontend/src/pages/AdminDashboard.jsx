@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import AdminOverviewTab from '../components/admin/AdminOverviewTab.jsx';
 import AdminRestaurantsTab from '../components/admin/AdminRestaurantsTab.jsx';
 import AdminCouponsTab from '../components/admin/AdminCouponsTab.jsx';
+import AdminOrdersTab from '../components/admin/AdminOrdersTab.jsx';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'restaurants' | 'coupons'
 
   const tabs = [
     { key: 'overview', label: 'Overview' },
+    { key: 'orders', label: 'Orders' },
     { key: 'restaurants', label: 'Restaurants' },
     { key: 'coupons', label: 'Coupons' }
   ];
@@ -37,6 +39,7 @@ export default function AdminDashboard() {
       </div>
 
       {activeTab === 'overview' && <AdminOverviewTab />}
+      {activeTab === 'orders' && <AdminOrdersTab />}
       {activeTab === 'restaurants' && <AdminRestaurantsTab />}
       {activeTab === 'coupons' && <AdminCouponsTab />}
     </main>

@@ -78,7 +78,6 @@ export default function Restaurant() {
           <div className="flex items-center gap-3 text-xs font-semibold">
             <span className="bg-green-700 text-white px-2 py-1 rounded">★ {restaurant.rating || 4.2}</span>
             <span className="text-gray-700">{restaurant.deliveryTime}</span>
-            <span className="text-gray-700">{formatPrice(restaurant.minOrder)} for two</span>
           </div>
         </div>
       </div>

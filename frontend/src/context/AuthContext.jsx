@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
 
   // Load saved user & token from localStorage on initial page load
   useEffect(() => {
+    let active = true;
     try {
       const savedToken = localStorage.getItem('token');
       const savedUser = localStorage.getItem('user');
@@ -18,14 +19,33 @@ export const AuthProvider = ({ children }) => {
       if (savedToken && savedUser) {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
+        // Validate persisted credentials once so stale tokens never surface
+        // as confusing order/checkout errors later in the journey.
+        api.get('/auth/me')
+          .then((res) => {
+            if (!active) return;
+            const currentUser = res.data?.user;
+            if (currentUser) {
+              setUser(currentUser);
+              localStorage.setItem('user', JSON.stringify(currentUser));
+            }
+          })
+          .catch(() => {
+            if (!active) return;
+            setToken(null);
+            setUser(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          });
       }
     } catch (error) {
       console.error('Failed to parse user from localStorage', error);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     } finally {
-      setLoading(false);
+      if (active) setLoading(false);
     }
+    return () => { active = false; };
   }, []);
 
   // Login function: sends credentials to backend, stores token & user

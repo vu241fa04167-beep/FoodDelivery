@@ -49,7 +49,7 @@ export default function Cart() {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
         <h2 className="text-xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
-        <p className="text-xs text-gray-500 mb-6">Good food is always cooking! Go ahead, order some yummy items from the menu.</p>
+        <p className="text-xs text-gray-500 mb-6">Browse the menu and add your favourites to get started.</p>
         <Link to="/" className="inline-block px-5 py-2.5 bg-primary text-white text-xs font-bold rounded shadow-xs hover:opacity-90">
           Browse restaurants
         </Link>

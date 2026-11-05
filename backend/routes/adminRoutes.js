@@ -2,6 +2,7 @@ import express from 'express';
 import { protect, authorize } from '../middleware/auth.js';
 import {
   getAdminStats,
+  getAdminOrders,
   getAdminRestaurants,
   updateRestaurantApproval,
   getAdminCoupons,
@@ -18,6 +19,7 @@ router.use(authorize('admin'));
 
 // Platform Stats
 router.get('/stats', getAdminStats);
+router.get('/orders', getAdminOrders);
 
 // Restaurant Approvals
 router.get('/restaurants', getAdminRestaurants);

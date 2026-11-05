@@ -29,6 +29,20 @@ export const getAdminStats = async (req, res, next) => {
   }
 };
 
+// GET /api/admin/orders - Admin view of incoming customer orders
+export const getAdminOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find()
+      .populate('customer', 'name email phone')
+      .populate('restaurant', 'name area')
+      .sort({ createdAt: -1 })
+      .limit(200);
+    res.json(orders);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // GET /api/admin/restaurants - List all restaurants (pending first)
 export const getAdminRestaurants = async (req, res, next) => {
   try {
