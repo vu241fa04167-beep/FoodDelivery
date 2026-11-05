@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import restaurantRoutes from './routes/restaurantRoutes.js';
@@ -32,6 +33,7 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
+  'https://food-delivery-ni4v.vercel.app',
   'https://food-delivery-nine-liard.vercel.app'
 ];
 app.use(
@@ -43,7 +45,9 @@ app.use(
         (process.env.CLIENT_URL && process.env.CLIENT_URL.replace(/\/$/, '') === origin.replace(/\/$/, ''));
       callback(null, !!isAllowed);
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
   })
 );
 app.use(express.json({ limit: '100kb' }));
@@ -83,15 +87,37 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Fallback mounts without /api prefix for compatibility
+app.use('/auth', authRoutes);
+app.use('/restaurants', restaurantRoutes);
+app.use('/menu', menuRoutes);
+app.use('/orders', orderRoutes);
+app.use('/coupons', couponRoutes);
+app.use('/admin', adminRoutes);
+
 // Global Error Handler Middleware
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`API server running on http://localhost:${PORT}`);
   });
+
+  const gracefulShutdown = (signal) => {
+    console.log(`Received ${signal}. Shutting down gracefully...`);
+    server.close(() => {
+      console.log('HTTP server closed.');
+      mongoose.connection.close(false).then(() => {
+        console.log('MongoDB connection closed.');
+        process.exit(0);
+      });
+    });
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 }
 
 export default app;

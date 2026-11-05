@@ -1,14 +1,21 @@
 import axios from 'axios';
 
-// A hosted frontend may receive either the backend origin or the full /api URL.
-// Normalise both forms so a missing trailing "/api" cannot turn every request
-// into a production 404.
-const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
-const baseURL = configuredApiUrl
-  ? (configuredApiUrl.endsWith('/api') ? configuredApiUrl : `${configuredApiUrl}/api`)
-  : '/api';
+// Resolve and normalize the base API URL across local dev and production deployments
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && envUrl.trim() !== '') {
+    const trimmed = envUrl.trim().replace(/\/$/, '');
+    return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+  }
+  return import.meta.env.PROD
+    ? 'https://fooddelivery-08xq.onrender.com/api'
+    : '/api';
+};
 
-const api = axios.create({ baseURL });
+// Create an Axios instance with base API URL
+const api = axios.create({
+  baseURL: getBaseURL()
+});
 
 // Request interceptor: attach JWT token from localStorage to every outgoing request
 api.interceptors.request.use(
@@ -39,4 +46,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
