@@ -6,6 +6,7 @@ const CartContext = createContext(null);
 export const CartProvider = ({ children }) => {
   const [restaurant, setRestaurant] = useState(null);
   const [items, setItems] = useState([]);
+  const [hydrated, setHydrated] = useState(false);
 
   // Load saved cart from localStorage on initial page load
   useEffect(() => {
@@ -20,17 +21,22 @@ export const CartProvider = ({ children }) => {
       }
     } catch {
       localStorage.removeItem('cart');
+    } finally {
+      // Do not let the initial empty React state overwrite a saved cart
+      // before it has finished loading from localStorage.
+      setHydrated(true);
     }
   }, []);
 
   // Sync cart state with localStorage
   useEffect(() => {
+    if (!hydrated) return;
     try {
       localStorage.setItem('cart', JSON.stringify({ restaurant, items }));
     } catch (e) {
       console.error('Error saving cart:', e);
     }
-  }, [restaurant, items]);
+  }, [hydrated, restaurant, items]);
 
   // Derived values: total items count and subtotal
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
