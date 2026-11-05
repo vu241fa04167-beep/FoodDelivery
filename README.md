@@ -93,6 +93,7 @@ npm install
 Create `.env` in the `backend/` folder:
 ```env
 PORT=5000
+NODE_ENV=development
 MONGODB_URI=mongodb://localhost:27017/quickbite
 JWT_SECRET=replace-with-a-long-random-secret
 CLIENT_URL=http://localhost:5173
@@ -104,7 +105,7 @@ VITE_API_URL=/api
 ```
 
 ### 4. Seed the Database
-Populate demo users, Bengaluru restaurants, menus, and discount coupons:
+Populate demo users, the Meghana Foods restaurant, its 55-item menu, and discount coupons:
 ```bash
 cd backend
 npm run seed
@@ -129,6 +130,16 @@ npm run dev
 
 Open your browser at `http://localhost:5173`.
 
+### Production deployment
+
+Run the backend as a Node web service and the frontend as a static site. Set these values in the hosting provider instead of committing secrets:
+
+**Backend:** `NODE_ENV=production`, a managed `MONGODB_URI`, a long random `JWT_SECRET`, and the deployed frontend URL in `CLIENT_URL`.
+
+**Frontend:** `VITE_API_URL=https://<your-backend-domain>/api`, then build with `npm run build` and publish `frontend/dist`.
+
+Production startup intentionally stops when MongoDB authentication fails; it never falls back to a local database.
+
 ---
 
 ## Demo Accounts
@@ -147,11 +158,17 @@ Demo Coupon Code: **`WELCOME50`** (50% off up to ₹100 on orders above ₹200)
 
 ## API Endpoints
 
-### Authentication
+### Authentication & Profile
 - `POST /api/auth/register` — Register a new customer
 - `POST /api/auth/login` — Login and receive JWT token (rate limited)
-- `GET /api/auth/me` — Get current logged-in profile
-- `PUT /api/auth/profile` — Update user address or phone
+- `GET /api/auth/me` — Get current logged-in profile with addresses
+- `PUT /api/auth/profile` — Update user name or phone (10 digits)
+- `PUT /api/auth/password` — Change password (requires current password verification)
+- `GET /api/auth/addresses` — List saved delivery addresses
+- `POST /api/auth/addresses` — Add saved delivery address (max 5)
+- `PUT /api/auth/addresses/:id` — Update saved address
+- `DELETE /api/auth/addresses/:id` — Delete saved address
+- `PATCH /api/auth/addresses/:id/default` — Set default address
 
 ### Restaurants & Menu
 - `GET /api/restaurants` — List approved restaurants (`?search=&cuisine=&veg=&sort=`)
@@ -171,14 +188,15 @@ Demo Coupon Code: **`WELCOME50`** (50% off up to ₹100 on orders above ₹200)
 - `GET /api/orders/:id` — Single order tracking details
 - `PATCH /api/orders/:id/cancel` — Customer cancels order (only while "placed")
 - `GET /api/orders/restaurant` — Owner views incoming orders
-- `PATCH /api/orders/:id/status` — Owner updates status (sequential)
-- `POST /api/orders/:id/review` — Customer submits 1-5 star review for delivered order
+- `PATCH /api/orders/:id/status` — Owner / Admin updates status (sequential)
+- `POST /api/orders/:id/review` — Customer rates delivered order 1-5 stars
 
 ### Coupons
 - `POST /api/coupons/validate` — Validate promo code and compute discount
 
 ### Admin
 - `GET /api/admin/stats` — Total users, restaurants, orders, and platform revenue
+- `GET /api/admin/orders` — View all incoming customer orders
 - `GET /api/admin/restaurants` — All restaurants with pending ones first
 - `PATCH /api/admin/restaurants/:id/status` — Approve or reject restaurant
 - `GET /api/admin/coupons` — List all promo coupons
@@ -190,9 +208,12 @@ Demo Coupon Code: **`WELCOME50`** (50% off up to ₹100 on orders above ₹200)
 
 ## Running Tests
 
-Run the automated test suites:
+Run all automated test suites (functional, lifecycle, security):
 ```bash
 cd backend
 npm test
-npm run test:phase2
 ```
+This runs:
+1. `test.js` — Core functional & auth tests
+2. `test-phase2.js` — Full ordering lifecycle, catalog & coupon tests
+3. `test-security.js` — Security, mass assignment, isolation & partner assignment tests

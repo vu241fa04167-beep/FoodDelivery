@@ -11,6 +11,12 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Database connection error: ${error.message}`);
+    // Never silently fall back to a local database in production. A deployed
+    // service must fail loudly when its managed MongoDB credentials are wrong.
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Production startup aborted: verify MONGODB_URI and network access.');
+      process.exit(1);
+    }
     if (primaryUri && primaryUri !== localUri) {
       try {
         const localConn = await tryConnect(localUri);

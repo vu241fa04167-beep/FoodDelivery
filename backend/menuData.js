@@ -40,7 +40,7 @@ export const meghanaMenu = [
   { name: 'Kadai Paneer', description: 'Paneer cubes and sliced capsicum cooked in a thick spicy kadai masala.', price: 199, category: 'Curries and Gravies', image: '/images/foods/kadai-paneer.jpg', isVeg: true, isAvailable: true },
 
   // Rice and Fried Rice (6)
-  { name: 'Plain Rice', description: 'Steamed premium basmati rice served fluffy and fresh.', price: 79, category: 'Rice and Fried Rice', image: '/images/foods/plain-rice.jpg', isVeg: true, isAvailable: true },
+  { name: 'Plain Rice', description: 'Steamed basmati rice served fluffy and fresh.', price: 79, category: 'Rice and Fried Rice', image: '/images/foods/plain-rice.jpg', isVeg: true, isAvailable: true },
   { name: 'Jeera Rice', description: 'Basmati rice tempered with roasted cumin seeds and fresh ghee.', price: 119, category: 'Rice and Fried Rice', image: '/images/foods/jeera-rice.jpg', isVeg: true, isAvailable: true },
   { name: 'Veg Fried Rice', description: 'Wok tossed rice with finely diced carrots, beans, and spring onions.', price: 139, category: 'Rice and Fried Rice', image: '/images/foods/veg-fried-rice.jpg', isVeg: true, isAvailable: true },
   { name: 'Egg Fried Rice', description: 'Fluffy rice stir fried with scrambled eggs, soy sauce, and white pepper.', price: 159, category: 'Rice and Fried Rice', image: '/images/foods/egg-fried-rice.jpg', isVeg: false, isAvailable: true },

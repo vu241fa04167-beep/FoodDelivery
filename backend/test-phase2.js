@@ -76,7 +76,7 @@ async function runPhase2Tests() {
 
     // 1. Restaurant APIs
     const allRest = await request('GET', '/api/restaurants');
-    test('1. GET /api/restaurants returns approved restaurant catalog', allRest.status === 200 && allRest.body.length >= 8 && allRest.body.some(r => r.name === 'Meghana Foods'));
+    test('1. GET /api/restaurants returns the single approved Meghana Foods catalog', allRest.status === 200 && allRest.body.length === 1 && allRest.body[0]?.name === 'Meghana Foods');
     const sampleRest = allRest.body.find(r => r.name === 'Meghana Foods') || allRest.body[0];
 
     const searchRes = await request('GET', '/api/restaurants?search=Biryani');

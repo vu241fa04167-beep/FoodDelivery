@@ -80,14 +80,14 @@ export default function OrderTracking() {
         ['out_for_delivery', 'delivered'].includes(order.orderStatus) && order.deliveryPartner?.name ? (
           <div className="bg-white border border-gray-200 rounded p-4 flex items-center justify-between text-xs">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">🛵</span>
+              <span className="font-bold text-primary uppercase text-[11px] bg-orange-50 border border-orange-200 px-2 py-1 rounded">Rider</span>
               <div><p className="font-bold text-gray-800 text-sm">{order.deliveryPartner.name}</p><p className="text-gray-500">{order.deliveryPartner.vehicleNumber}</p></div>
             </div>
-            <a href={`tel:${order.deliveryPartner.phone}`} className="px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded font-bold hover:bg-green-100">📞 Call ({order.deliveryPartner.phone})</a>
+            <a href={`tel:${order.deliveryPartner.phone}`} className="px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded font-bold hover:bg-green-100">Call ({order.deliveryPartner.phone})</a>
           </div>
         ) : ['placed', 'preparing'].includes(order.orderStatus) ? (
           <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700 flex items-center gap-2">
-            <span>🛵</span><span>A delivery partner will be assigned once your order is out for delivery.</span>
+            <span className="font-bold uppercase text-[10px] bg-white border border-blue-200 px-1.5 py-0.5 rounded">Info</span><span>A delivery partner will be assigned once your order is out for delivery.</span>
           </div>
         ) : null
       )}

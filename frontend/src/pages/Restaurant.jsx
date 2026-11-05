@@ -6,8 +6,9 @@ import CartSidebar from '../components/CartSidebar.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import formatPrice from '../utils/formatPrice.js';
 
-export default function Restaurant() {
+export default function Restaurant({ restaurantId }) {
   const { id } = useParams();
+  const resolvedId = restaurantId || id;
   const { itemCount, itemTotal } = useCart();
 
   const [restaurant, setRestaurant] = useState(null), [menuItems, setMenuItems] = useState([]), [loading, setLoading] = useState(true);
@@ -19,8 +20,8 @@ export default function Restaurant() {
         setLoading(true);
         setError('');
         const [restRes, menuRes] = await Promise.all([
-          api.get(`/restaurants/${id}`),
-          api.get(`/restaurants/${id}/menu`)
+          api.get(`/restaurants/${resolvedId}`),
+          api.get(`/restaurants/${resolvedId}/menu`)
         ]);
         setRestaurant(restRes.data);
         setMenuItems(menuRes.data);
@@ -32,7 +33,7 @@ export default function Restaurant() {
       }
     };
     fetchRestaurantAndMenu();
-  }, [id]);
+  }, [resolvedId]);
 
   if (loading) return <div className="max-w-6xl mx-auto px-4 py-16 text-center text-sm text-gray-500">Loading menu...</div>;
 

@@ -80,7 +80,7 @@ export default function AdminOrdersTab() {
                 <p className="text-gray-500 text-[11px]">Payment: <span className="font-bold uppercase text-gray-700">{order.paymentMethod}</span> ({order.paymentStatus})</p>
                 {order.deliveryPartner?.name && ['out_for_delivery', 'delivered'].includes(order.orderStatus) && (
                   <p className="text-gray-700 text-[11px] mt-1 bg-gray-50 border border-gray-200 p-1.5 rounded">
-                    🛵 <b>{order.deliveryPartner.name}</b> ({order.deliveryPartner.vehicleNumber}) • {order.deliveryPartner.phone}
+                    <b>Delivery Partner:</b> {order.deliveryPartner.name} ({order.deliveryPartner.vehicleNumber}) • {order.deliveryPartner.phone}
                   </p>
                 )}
               </div>

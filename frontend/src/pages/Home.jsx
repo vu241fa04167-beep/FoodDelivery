@@ -1,137 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/axios.js';
-import RestaurantCard from '../components/RestaurantCard.jsx';
+import MenuItemCard from '../components/MenuItemCard.jsx';
+import formatPrice from '../utils/formatPrice.js';
 
-const CUISINES = ['All', 'North Indian', 'South Indian', 'Biryani', 'Pizza', 'Burgers', 'Chinese', 'Desserts'];
+const CATEGORIES = ['All', 'Biryani Specials', 'Starters', 'Kebabs and Tandoori', 'Curries and Gravies', 'Rice and Fried Rice', 'Indian Breads', 'Beverages', 'Desserts'];
 
 export default function Home() {
   const [searchParams] = useSearchParams();
   const search = searchParams.get('search') || '';
-
-  const [restaurants, setRestaurants] = useState([]);
+  const [restaurant, setRestaurant] = useState(null);
+  const [menuItems, setMenuItems] = useState([]);
+  const [category, setCategory] = useState('All');
+  const [diet, setDiet] = useState('all');
+  const [sort, setSort] = useState('recommended');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const [selectedCuisine, setSelectedCuisine] = useState('All');
-  const [isPureVeg, setIsPureVeg] = useState(false);
-  const [sortOption, setSortOption] = useState('rating');
-
-  const fetchRestaurants = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = {};
-      if (search) params.search = search;
-      if (selectedCuisine && selectedCuisine !== 'All') params.cuisine = selectedCuisine;
-      if (isPureVeg) params.veg = 'true';
-      if (sortOption) params.sort = sortOption;
-
-      const res = await api.get('/restaurants', { params });
-      setRestaurants(res.data);
-    } catch (err) {
-      console.error('Home page load error:', err);
-      setError('Failed to load restaurants. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchRestaurants();
-  }, [search, selectedCuisine, isPureVeg, sortOption]);
+    let active = true;
+    api.get('/restaurants')
+      .then(async ({ data }) => {
+        const currentRestaurant = data.find((item) => item.name === 'Meghana Foods') || data[0];
+        if (!currentRestaurant?._id) throw new Error('Menu unavailable');
+        const menu = await api.get(`/restaurants/${currentRestaurant._id}/menu`);
+        if (!active) return;
+        setRestaurant(currentRestaurant);
+        setMenuItems(menu.data);
+      })
+      .catch(() => active && setError("We could not load today's menu. Please retry."))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
+  }, []);
 
-  const handleCuisineClick = (cuisine) => {
-    setSelectedCuisine(selectedCuisine === cuisine ? 'All' : cuisine);
-  };
+  const visibleItems = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    const items = menuItems.filter((item) => {
+      const matchesCategory = category === 'All' || item.category === category;
+      const matchesDiet = diet === 'all' || (diet === 'veg' ? item.isVeg : !item.isVeg);
+      const matchesSearch = !term || `${item.name} ${item.description || ''}`.toLowerCase().includes(term);
+      return matchesCategory && matchesDiet && matchesSearch;
+    });
+    if (sort === 'recommended') {
+      const rank = new Map(CATEGORIES.map((name, index) => [name, index]));
+      return [...items].sort((a, b) => (rank.get(a.category) ?? 99) - (rank.get(b.category) ?? 99));
+    }
+    return [...items].sort((a, b) => sort === 'price-low' ? a.price - b.price : b.price - a.price);
+  }, [menuItems, category, diet, sort, search]);
+
+  if (loading) return <main className="page-state">Loading QuickBite menu…</main>;
+  if (error || !restaurant) return <main className="page-state"><p>{error || 'Menu unavailable.'}</p><button className="primary-button" onClick={() => window.location.reload()}>Retry</button></main>;
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-6">
-      {/* Short Banner */}
-      <div className="bg-orange-50 border border-orange-100 rounded-lg p-3.5 mb-6 text-center text-sm font-medium text-gray-700">
-        Order authentic meals and fresh delicacies from top-rated restaurants across Bengaluru.
-      </div>
-
-      {/* Cuisine Filter Chips */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-none">
-        {CUISINES.map((cuisine) => (
-          <button
-            key={cuisine}
-            type="button"
-            onClick={() => handleCuisineClick(cuisine)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
-              selectedCuisine === cuisine
-                ? 'bg-primary text-white shadow-xs'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {cuisine}
-          </button>
-        ))}
-      </div>
-
-      {/* Filter and Sort Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-200 mb-6 text-sm">
-        <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700 text-xs">
-          <input
-            type="checkbox"
-            checked={isPureVeg}
-            onChange={(e) => setIsPureVeg(e.target.checked)}
-            className="w-4 h-4 accent-primary rounded cursor-pointer"
-          />
-          <span>Pure Veg</span>
-        </label>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 font-medium">Sort by:</span>
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-            className="bg-white border border-gray-300 text-xs rounded px-2.5 py-1.5 focus:outline-none focus:border-primary text-gray-700 font-medium cursor-pointer"
-          >
-            <option value="rating">Rating (High to Low)</option>
-            <option value="deliveryTime">Delivery Time</option>
-            <option value="priceLow">Price (Low to High)</option>
-          </select>
+    <main className="home-page">
+      <section className="home-hero">
+        <div className="home-hero-copy">
+          <span className="eyebrow">MEGHANA FOODS · BENGALURU</span>
+          <h1>Real biryani.<br /><span>Made for your table.</span></h1>
+          <p>Fresh Andhra flavours, comforting classics, and quick delivery from one trusted kitchen.</p>
+          <div className="hero-actions"><Link to="/menu" className="primary-button">Browse full menu</Link><span className="hero-meta">★ {restaurant.rating || '4.4'} · {restaurant.deliveryTime || '25–35 mins'}</span></div>
         </div>
-      </div>
+        <img className="home-hero-image" src={restaurant.image || 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=1200&q=85'} alt="Meghana Foods biryani" />
+      </section>
 
-      {/* Loading Skeleton / Text */}
-      {loading && (
-        <div className="py-20 text-center text-gray-400 text-xs">
-          Loading restaurants...
-        </div>
-      )}
-
-      {/* Error State with Retry */}
-      {!loading && error && (
-        <div className="py-16 text-center">
-          <p className="text-red-500 font-medium text-sm mb-3">{error}</p>
-          <button
-            type="button"
-            onClick={fetchRestaurants}
-            className="px-4 py-1.5 bg-primary text-white text-xs font-bold rounded shadow-xs hover:opacity-90"
-          >
-            Retry
-          </button>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!loading && !error && restaurants.length === 0 && (
-        <div className="py-20 text-center text-gray-500 text-sm border border-dashed rounded-lg bg-gray-50">
-          No restaurants found matching your criteria.
-        </div>
-      )}
-
-      {/* Restaurant Cards Grid */}
-      {!loading && !error && restaurants.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {restaurants.map((restaurant) => (
-            <RestaurantCard key={restaurant._id} restaurant={restaurant} />
-          ))}
-        </div>
-      )}
+      <section className="home-section">
+        <div className="section-heading"><div><span className="eyebrow">THE COMPLETE MENU</span><h2>Order what feels right</h2></div><Link to="/menu" className="text-link">See all items →</Link></div>
+        <div className="menu-controls"><select value={diet} onChange={(e) => setDiet(e.target.value)} aria-label="Food preference"><option value="all">All items</option><option value="veg">Veg only</option><option value="nonveg">Non-veg only</option></select><select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort menu"><option value="recommended">Recommended</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></div>
+        <div className="category-chips">{CATEGORIES.map((item) => <button type="button" key={item} className={category === item ? 'active' : ''} onClick={() => setCategory(item)}>{item}</button>)}</div>
+        <div className="menu-grid">{visibleItems.slice(0, 12).map((item) => <MenuItemCard key={item._id} item={item} restaurant={restaurant} compact />)}</div>
+        <div className="center-action"><Link to="/menu" className="primary-button">View all {menuItems.length} items</Link></div>
+      </section>
+      <section className="home-trust"><span>✓ Accurate item photos</span><span>✓ Freshly prepared</span><span>✓ Live order updates</span><strong>{formatPrice(restaurant.minOrder || 150)} minimum order</strong></section>
     </main>
   );
 }

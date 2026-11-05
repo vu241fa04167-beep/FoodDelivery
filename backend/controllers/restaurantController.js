@@ -7,7 +7,10 @@ const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 export const getAllRestaurants = async (req, res, next) => {
   try {
     const { search, cuisine, veg, sort } = req.query;
-    let query = { status: 'approved' };
+    // QuickBite currently serves one restaurant. Keep the public customer
+    // catalog focused on Meghana Foods even if an older database still has
+    // demo restaurant records from the original multi-restaurant seed.
+    let query = { status: 'approved', name: 'Meghana Foods' };
 
     // Search by restaurant name, cuisine, OR dish name on its menu
     if (search !== undefined && typeof search !== 'string') {
@@ -18,11 +21,13 @@ export const getAllRestaurants = async (req, res, next) => {
       const dishes = await MenuItem.find({ name: { $regex: term, $options: 'i' } }).select('restaurant');
       const restIds = dishes.map((d) => d.restaurant);
 
-      query.$or = [
-        { name: { $regex: term, $options: 'i' } },
-        { cuisine: { $regex: term, $options: 'i' } },
-        { _id: { $in: restIds } }
-      ];
+      query.$and = [{
+        $or: [
+          { name: { $regex: term, $options: 'i' } },
+          { cuisine: { $regex: term, $options: 'i' } },
+          { _id: { $in: restIds } }
+        ]
+      }];
     }
 
     // Filter by cuisine
