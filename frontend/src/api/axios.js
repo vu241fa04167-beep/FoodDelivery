@@ -1,9 +1,14 @@
 import axios from 'axios';
 
-// Create an Axios instance with base API URL
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api'
-});
+// A hosted frontend may receive either the backend origin or the full /api URL.
+// Normalise both forms so a missing trailing "/api" cannot turn every request
+// into a production 404.
+const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+const baseURL = configuredApiUrl
+  ? (configuredApiUrl.endsWith('/api') ? configuredApiUrl : `${configuredApiUrl}/api`)
+  : '/api';
+
+const api = axios.create({ baseURL });
 
 // Request interceptor: attach JWT token from localStorage to every outgoing request
 api.interceptors.request.use(
