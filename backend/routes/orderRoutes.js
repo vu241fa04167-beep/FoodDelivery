@@ -23,9 +23,9 @@ router.get('/mine', authorize('customer'), getMyOrders);
 router.patch('/:id/cancel', authorize('customer'), cancelOrder);
 router.post('/:id/review', authorize('customer'), reviewOrder);
 
-// Owner specific routes
+// Owner & Admin order management
 router.get('/restaurant', authorize('owner'), getOwnerOrders);
-router.patch('/:id/status', authorize('owner'), updateOrderStatus);
+router.patch('/:id/status', authorize('owner', 'admin'), updateOrderStatus);
 
 // Accessible by customer, owner or admin
 router.get('/:id', getOrderById);

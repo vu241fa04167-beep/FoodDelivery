@@ -10,10 +10,8 @@ export default function Restaurant() {
   const { id } = useParams();
   const { itemCount, itemTotal } = useCart();
 
-  const [restaurant, setRestaurant] = useState(null), [menuItems, setMenuItems] = useState([]);
-  const [loading, setLoading] = useState(true), [error, setError] = useState('');
-  const [dietFilter, setDietFilter] = useState('all'), [activeCategory, setActiveCategory] = useState('');
-  const [sortBy, setSortBy] = useState('recommended');
+  const [restaurant, setRestaurant] = useState(null), [menuItems, setMenuItems] = useState([]), [loading, setLoading] = useState(true);
+  const [error, setError] = useState(''), [dietFilter, setDietFilter] = useState('all'), [activeCategory, setActiveCategory] = useState(''), [sortBy, setSortBy] = useState('recommended');
 
   useEffect(() => {
     const fetchRestaurantAndMenu = async () => {
@@ -48,11 +46,7 @@ export default function Restaurant() {
     );
   }
 
-  const dietaryItems = dietFilter === 'veg'
-    ? menuItems.filter((i) => i.isVeg)
-    : dietFilter === 'nonveg'
-      ? menuItems.filter((i) => !i.isVeg)
-      : menuItems;
+  const dietaryItems = dietFilter === 'veg' ? menuItems.filter((i) => i.isVeg) : dietFilter === 'nonveg' ? menuItems.filter((i) => !i.isVeg) : menuItems;
   const filteredItems = [...dietaryItems].sort((a, b) => {
     if (sortBy === 'price-low') return a.price - b.price;
     if (sortBy === 'price-high') return b.price - a.price;

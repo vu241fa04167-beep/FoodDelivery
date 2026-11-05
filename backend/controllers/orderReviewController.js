@@ -26,8 +26,10 @@ export const updateOrderStatus = async (req, res, next) => {
     const order = await Order.findById(req.params.id).populate('restaurant');
     if (!order) return res.status(404).json({ message: 'Order not found' });
 
-    if (order.restaurant.owner.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Forbidden: You do not own the restaurant for this order' });
+    const isOwner = order.restaurant?.owner?.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Forbidden: You do not have permission to update this order' });
     }
 
     // Sequence: placed > preparing > out_for_delivery > delivered (No skipping allowed)

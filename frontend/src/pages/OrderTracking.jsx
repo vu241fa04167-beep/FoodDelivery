@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios.js';
 import StatusSteps from '../components/StatusSteps.jsx';
 import formatPrice from '../utils/formatPrice.js';
 
 export default function OrderTracking() {
   const fallbackImage = '/images/foods/fallback.jpg', { id } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null), [loading, setLoading] = useState(true);
-  const [error, setError] = useState(''), [rating, setRating] = useState(5);
-  const [comment, setComment] = useState(''), [submittingReview, setSubmittingReview] = useState(false);
+  const [error, setError] = useState(''), [rating, setRating] = useState(5), [comment, setComment] = useState(''), [submittingReview, setSubmittingReview] = useState(false);
 
   const fetchOrder = async () => {
     try { const res = await api.get(`/orders/${id}`); setOrder(res.data); }
-    catch (err) { setError(err.response?.data?.message || 'Failed to load order'); }
-    finally { setLoading(false); }
+    catch (err) {
+      if (err.isAuthError) {
+        navigate(`/login?redirect=/orders/${id}`);
+        return;
+      }
+      setError(err.response?.data?.message || 'Failed to load order');
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchOrder(); }, [id]);
-
   useEffect(() => {
     if (!order || !['placed', 'preparing', 'out_for_delivery'].includes(order.orderStatus)) return;
     const interval = setInterval(() => { fetchOrder(); }, 10000);

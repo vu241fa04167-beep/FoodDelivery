@@ -45,7 +45,15 @@ export const AuthProvider = ({ children }) => {
     } finally {
       if (active) setLoading(false);
     }
-    return () => { active = false; };
+    const onAuthLogout = () => {
+      setToken(null);
+      setUser(null);
+    };
+    window.addEventListener('auth:logout', onAuthLogout);
+    return () => {
+      active = false;
+      window.removeEventListener('auth:logout', onAuthLogout);
+    };
   }, []);
 
   // Login function: sends credentials to backend, stores token & user

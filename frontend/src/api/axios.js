@@ -19,16 +19,16 @@ api.interceptors.request.use(
   }
 );
 
-// Keep the local session intact when a single protected request returns 401.
-// A transient API/auth failure (for example while the backend is restarting)
-// should not unexpectedly throw the customer out of the app. Protected pages
-// render their own retry/error state instead.
+// When receiving 401, purge stale token so requests do not remain stuck in an invalid state.
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    if (error.response?.status === 401) error.isAuthError = true;
+    if (error.response?.status === 401) {
+      error.isAuthError = true;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.dispatchEvent(new Event('auth:logout'));
+    }
     return Promise.reject(error);
   }
 );

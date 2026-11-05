@@ -1,58 +1,137 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/axios.js';
+import RestaurantCard from '../components/RestaurantCard.jsx';
 
-const fallbackImage = '/images/foods/fallback.jpg';
-const categories = [
-  ['Biryani Specials', 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=500&q=80'],
-  ['Starters', 'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=500&q=80'],
-  ['Kebabs and Tandoori', 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=500&q=80'],
-  ['Curries and Gravies', 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=500&q=80'],
-  ['Rice and Fried Rice', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80'],
-  ['Indian Breads', 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=500&q=80'],
-  ['Beverages', 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80'],
-  ['Desserts', 'https://images.unsplash.com/photo-1593701461250-d7b22dfd3a77?auto=format&fit=crop&w=500&q=80']
-];
-
-const useFallback = (event) => {
-  event.currentTarget.onerror = null;
-  event.currentTarget.src = fallbackImage;
-};
+const CUISINES = ['All', 'North Indian', 'South Indian', 'Biryani', 'Pizza', 'Burgers', 'Chinese', 'Desserts'];
 
 export default function Home() {
-  const [restaurant, setRestaurant] = useState(null);
-  const [featured, setFeatured] = useState([]);
-  const [error, setError] = useState('');
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get('search') || '';
+
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [selectedCuisine, setSelectedCuisine] = useState('All');
+  const [isPureVeg, setIsPureVeg] = useState(false);
+  const [sortOption, setSortOption] = useState('rating');
+
+  const fetchRestaurants = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = {};
+      if (search) params.search = search;
+      if (selectedCuisine && selectedCuisine !== 'All') params.cuisine = selectedCuisine;
+      if (isPureVeg) params.veg = 'true';
+      if (sortOption) params.sort = sortOption;
+
+      const res = await api.get('/restaurants', { params });
+      setRestaurants(res.data);
+    } catch (err) {
+      console.error('Home page load error:', err);
+      setError('Failed to load restaurants. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let active = true;
-    api.get('/restaurants')
-      .then(({ data }) => {
-        const current = data.find((item) => item.name === 'Meghana Foods') || data[0];
-        if (!current) throw new Error('No restaurant');
-        return api.get(`/restaurants/${current._id}/menu`).then(({ data: menu }) => ({ current, menu }));
-      })
-      .then(({ current, menu }) => {
-        if (!active) return;
-        setRestaurant(current);
-        const preferred = ['Chicken Dum Biryani', 'Veg Biryani', 'Chicken 65', 'Paneer Tikka'];
-        setFeatured(preferred.map((name) => menu.find((item) => item.name === name)).filter(Boolean));
-      })
-      .catch(() => active && setError('The menu is temporarily unavailable.'));
-    return () => { active = false; };
-  }, []);
+    fetchRestaurants();
+  }, [search, selectedCuisine, isPureVeg, sortOption]);
 
-  if (!restaurant && !error) return <main className="max-w-6xl mx-auto px-4 py-24 text-center text-sm text-gray-500">Preparing today&apos;s menu...</main>;
-  if (error) return <main className="max-w-md mx-auto px-4 py-24 text-center"><p className="text-red-600 font-semibold mb-3">{error}</p><button type="button" onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-white rounded text-sm font-semibold">Retry</button></main>;
+  const handleCuisineClick = (cuisine) => {
+    setSelectedCuisine(selectedCuisine === cuisine ? 'All' : cuisine);
+  };
 
   return (
-    <main className="bg-[#fffaf5] flex-1">
-      <section className="max-w-6xl mx-auto px-4 pt-8 pb-12 md:pt-14 md:pb-16 grid md:grid-cols-2 gap-8 items-center">
-        <div><span className="inline-flex bg-orange-100 text-orange-800 rounded-full px-3 py-1 text-xs font-bold">MEGHANA FOODS · KORAMANGALA</span><h1 className="mt-5 text-4xl md:text-6xl font-black tracking-tight text-gray-950 leading-[1.05]">Biryani worth<br /><span className="text-primary">coming back for.</span></h1><p className="mt-5 text-base text-gray-600 max-w-md leading-relaxed">Slow-cooked rice, bold Andhra flavours and comfort food made fresh for your table.</p><div className="mt-7 flex flex-wrap gap-3"><Link to={`/restaurant/${restaurant._id}`} className="px-5 py-3 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover">Browse the menu →</Link><Link to="/cart" className="px-5 py-3 rounded-lg bg-white text-gray-800 text-sm font-bold border border-gray-200">View your cart</Link></div><div className="mt-8 flex items-center gap-5 text-xs text-gray-500"><span><b className="text-gray-900">{restaurant.rating || 4.4}</b> ★ rating</span><span>{restaurant.deliveryTime || '25–35 mins'} delivery</span></div></div>
-        <div className="relative rounded-3xl overflow-hidden h-72 md:h-96 shadow-xl bg-gray-200"><img src={restaurant.image || fallbackImage} onError={useFallback} alt="Meghana Foods biryani" className="w-full h-full object-cover" /><div className="absolute bottom-4 left-4 right-4 bg-white/95 rounded-xl p-3 flex items-center justify-between"><span className="text-xs font-bold text-gray-900">Freshly prepared today</span><span className="text-xs text-primary font-bold">Open now</span></div></div>
-      </section>
-      <section className="max-w-6xl mx-auto px-4 pb-10"><div className="flex items-end justify-between mb-4"><div><p className="text-xs font-bold uppercase tracking-widest text-primary">Explore</p><h2 className="text-2xl font-black text-gray-950">What are you craving?</h2></div><Link to={`/restaurant/${restaurant._id}`} className="text-sm font-bold text-primary">See full menu →</Link></div><div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">{categories.map(([name, image]) => <Link key={name} to={`/restaurant/${restaurant._id}#cat-${name}`} className="relative overflow-hidden rounded-2xl min-h-24 flex items-end"><img src={image} onError={useFallback} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-60" /><span className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" /><span className="relative p-3 text-[11px] leading-tight font-bold text-white">{name}</span></Link>)}</div></section>
-      <section className="max-w-6xl mx-auto px-4 pb-16"><div className="flex items-end justify-between mb-4"><div><p className="text-xs font-bold uppercase tracking-widest text-primary">Popular today</p><h2 className="text-2xl font-black text-gray-950">Customer favourites</h2></div><Link to={`/restaurant/${restaurant._id}`} className="text-sm font-bold text-primary">View all items →</Link></div><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{featured.map((item) => <Link key={item._id} to={`/restaurant/${restaurant._id}#cat-${item.category}`} className="bg-white rounded-2xl overflow-hidden border border-orange-100 hover:shadow-md transition-shadow"><img src={item.image || fallbackImage} onError={useFallback} alt={item.name} loading="lazy" className="w-full h-32 object-cover" /><div className="p-3"><h3 className="text-sm font-bold text-gray-900 truncate">{item.name}</h3><p className="mt-1 text-sm font-black text-primary">{formatPrice(item.price)}</p><p className="mt-1 text-[11px] text-gray-500 line-clamp-2">{item.description}</p></div></Link>)}</div></section>
+    <main className="max-w-6xl mx-auto px-4 py-6">
+      {/* Short Banner */}
+      <div className="bg-orange-50 border border-orange-100 rounded-lg p-3.5 mb-6 text-center text-sm font-medium text-gray-700">
+        Order authentic meals and fresh delicacies from top-rated restaurants across Bengaluru.
+      </div>
+
+      {/* Cuisine Filter Chips */}
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-none">
+        {CUISINES.map((cuisine) => (
+          <button
+            key={cuisine}
+            type="button"
+            onClick={() => handleCuisineClick(cuisine)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+              selectedCuisine === cuisine
+                ? 'bg-primary text-white shadow-xs'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {cuisine}
+          </button>
+        ))}
+      </div>
+
+      {/* Filter and Sort Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-200 mb-6 text-sm">
+        <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700 text-xs">
+          <input
+            type="checkbox"
+            checked={isPureVeg}
+            onChange={(e) => setIsPureVeg(e.target.checked)}
+            className="w-4 h-4 accent-primary rounded cursor-pointer"
+          />
+          <span>Pure Veg</span>
+        </label>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500 font-medium">Sort by:</span>
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="bg-white border border-gray-300 text-xs rounded px-2.5 py-1.5 focus:outline-none focus:border-primary text-gray-700 font-medium cursor-pointer"
+          >
+            <option value="rating">Rating (High to Low)</option>
+            <option value="deliveryTime">Delivery Time</option>
+            <option value="priceLow">Price (Low to High)</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Loading Skeleton / Text */}
+      {loading && (
+        <div className="py-20 text-center text-gray-400 text-xs">
+          Loading restaurants...
+        </div>
+      )}
+
+      {/* Error State with Retry */}
+      {!loading && error && (
+        <div className="py-16 text-center">
+          <p className="text-red-500 font-medium text-sm mb-3">{error}</p>
+          <button
+            type="button"
+            onClick={fetchRestaurants}
+            className="px-4 py-1.5 bg-primary text-white text-xs font-bold rounded shadow-xs hover:opacity-90"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && restaurants.length === 0 && (
+        <div className="py-20 text-center text-gray-500 text-sm border border-dashed rounded-lg bg-gray-50">
+          No restaurants found matching your criteria.
+        </div>
+      )}
+
+      {/* Restaurant Cards Grid */}
+      {!loading && !error && restaurants.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {restaurants.map((restaurant) => (
+            <RestaurantCard key={restaurant._id} restaurant={restaurant} />
+          ))}
+        </div>
+      )}
     </main>
   );
 }

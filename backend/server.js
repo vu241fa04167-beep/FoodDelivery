@@ -28,16 +28,20 @@ connectDB();
 const app = express();
 
 // Security and utility middleware
-app.use(helmet());
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://food-delivery-nine-liard.vercel.app'
+];
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || process.env.CLIENT_URL === origin) {
-        callback(null, true);
-      } else {
-        callback(null, false);
-      }
+      const isAllowed = !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        (process.env.CLIENT_URL && process.env.CLIENT_URL.replace(/\/$/, '') === origin.replace(/\/$/, ''));
+      callback(null, !!isAllowed);
     },
     credentials: true
   })
@@ -58,7 +62,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Basic health check route
+// Root and Health check routes
+app.get('/', (req, res) => {
+  res.json({ message: 'QuickBite API running', status: 'ok' });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',

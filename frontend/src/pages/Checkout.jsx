@@ -31,21 +31,16 @@ export default function Checkout() {
     setLoading(true);
     try {
       const res = await api.post('/orders', {
-        restaurantId: restaurant.id,
+        restaurantId: restaurant?.id || restaurant?._id,
         items: items.map((i) => ({ menuItemId: i.menuItemId, quantity: i.quantity })),
         address: fullAddress, paymentMethod, couponCode: coupon?.code
       });
       clearCart();
       navigate(`/orders/${res.data.order._id}`);
     } catch (err) {
-      if (err.isAuthError) {
-        navigate('/login?redirect=/checkout');
-        return;
-      }
+      if (err.isAuthError) { navigate('/login?redirect=/checkout'); return; }
       alert(err.response?.data?.message || 'Failed to place order');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleSavedOrder = (e) => {

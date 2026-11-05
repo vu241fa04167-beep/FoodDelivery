@@ -72,62 +72,49 @@ export const meghanaMenu = [
   { name: 'Apricot Delight', description: 'Layers of soft sponge cake, custard cream, and stewed sweet apricots.', price: 99, category: 'Desserts', image: '/images/foods/apricot-delight.jpg', isVeg: true, isAvailable: true }
 ];
 
-// Use stable Unsplash food photographs so menu images load in every environment.
-// The photos are grouped by dish style rather than using a random source URL.
+// Stable clean Unsplash food photographs matching item names and categories
 const onlineFoodImages = {
-  biryani: [
-    'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85',
-    'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85'
-  ],
-  chicken: [
-    'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=800&q=85',
-    'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=800&q=85',
-    'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=85'
-  ],
-  paneer: [
-    'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=800&q=85',
-    'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=85'
-  ],
-  rice: [
-    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=85',
-    'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=800&q=85'
-  ],
-  bread: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=85',
-  drink: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=85',
-  dessert: [
-    'https://images.unsplash.com/photo-1593701461250-d7b22dfd3a77?auto=format&fit=crop&w=800&q=85',
-    'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=800&q=85'
-  ]
+  biryani: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&q=80',
+  chicken: 'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?w=800&q=80',
+  tandoori: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&q=80',
+  curry: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=800&q=80',
+  paneer: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=800&q=80',
+  rice: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80',
+  bread: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80',
+  drink: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=800&q=80',
+  dessert: 'https://images.unsplash.com/photo-1593701461250-d7b22dfd3a77?w=800&q=80'
+};
+
+const exactImageByName = {
+  'Veg Biryani': 'https://images.unsplash.com/photo-1642821373181-696a54913e9a?w=800&q=80',
+  'Paneer Biryani': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=800&q=80',
+  'Egg Biryani': 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&q=80',
+  'Mutton Dum Biryani': 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=800&q=80',
+  'Mutton Fry Piece Biryani': 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=800&q=80',
+  'Mutton Curry': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&q=80',
+  'Apollo Fish': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&q=80',
+  'Chicken Lollipop': 'https://images.unsplash.com/photo-1527477378677-4c2a30d0d3a1?w=800&q=80',
+  'Chicken Lollipop Biryani': 'https://images.unsplash.com/photo-1527477378677-4c2a30d0d3a1?w=800&q=80',
+  'Water Bottle': 'https://images.unsplash.com/photo-1560512823-829485b8bf24?w=800&q=80',
+  'Coke': 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&q=80',
+  'Sprite': 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&q=80',
+  'Ice Cream': 'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=800&q=80'
 };
 
 const imageGroupFor = (item) => {
   const text = `${item.name} ${item.category}`.toLowerCase();
   if (text.includes('biryani')) return onlineFoodImages.biryani;
-  if (text.includes('dessert') || item.category === 'Desserts' || text.includes('jamun') || text.includes('meetha') || text.includes('ice cream') || text.includes('apricot')) return onlineFoodImages.dessert;
-  if (item.category === 'Beverages' || text.includes('coke') || text.includes('sprite') || text.includes('lassi') || text.includes('soda') || text.includes('buttermilk')) return onlineFoodImages.drink;
+  if (item.category === 'Desserts' || text.includes('jamun') || text.includes('meetha')) return onlineFoodImages.dessert;
+  if (item.category === 'Beverages' || text.includes('lassi') || text.includes('soda')) return onlineFoodImages.drink;
   if (item.category === 'Indian Breads' || text.includes('roti') || text.includes('naan')) return onlineFoodImages.bread;
   if (text.includes('paneer')) return onlineFoodImages.paneer;
   if (item.category === 'Rice and Fried Rice' || text.includes('rice')) return onlineFoodImages.rice;
+  if (item.category === 'Kebabs and Tandoori' || text.includes('tikka') || text.includes('tandoori')) return onlineFoodImages.tandoori;
+  if (item.category === 'Curries and Gravies' || text.includes('curry') || text.includes('masala')) return onlineFoodImages.curry;
   return onlineFoodImages.chicken;
 };
 
-const exactImageByName = {
-  'Veg Biryani': 'https://media-assets.swiggy.com/swiggy/image/upload/f_auto,q_auto,fl_lossy/RX_THUMBNAIL/IMAGES/VENDOR/2026/1/14/a1b4290a-2b6d-418a-aba8-be4e7ed15a2b_1304406.jpg',
-  'Paneer Biryani': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=85',
-  'Egg Biryani': 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,e_grayscale,c_fit/5e5b691930beefd542889cabb261aaf0',
-  'Chicken Dum Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85',
-  'Chicken Fry Piece Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85',
-  'Chicken Boneless Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85',
-  'Chicken Lollipop Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85',
-  'Mutton Dum Biryani': 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=85',
-  'Mutton Fry Piece Biryani': 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=85',
-  'Special Chicken Biryani': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=85'
-};
-
-meghanaMenu.forEach((item, index) => {
-  const group = imageGroupFor(item);
-  // Exact dish mappings take priority; category defaults only cover items
-  // that do not yet have a dedicated photo.
-  item.image = exactImageByName[item.name] || (Array.isArray(group) ? group[index % group.length] : group);
+meghanaMenu.forEach((item) => {
+  item.image = exactImageByName[item.name] || imageGroupFor(item);
 });
 
