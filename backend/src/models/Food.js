@@ -1,23 +1,57 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-const { Schema, model } = mongoose;
+const foodSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Food name is required'],
+      trim: true,
+    },
+    description: {
+      type: String,
+      required: [true, 'Description is required'],
+      trim: true,
+    },
+    price: {
+      type: Number,
+      required: [true, 'Price is required'],
+      min: 0,
+    },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true,
+    },
+    image: {
+      type: String,
+      default: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80',
+    },
+    isAvailable: {
+      type: Boolean,
+      default: true,
+    },
+    isPopular: {
+      type: Boolean,
+      default: false,
+    },
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    prepTime: {
+      type: Number,
+      default: 20,
+    },
+    ingredients: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
-const foodSchema = new Schema({
-  restaurant: { type: Schema.Types.ObjectId, ref: 'Restaurant', required: true },
-  category: { type: Schema.Types.ObjectId, ref: 'Category' },
-  name: { type: String, required: true, trim: true },
-  description: String,
-  price: { type: Number, required: true, min: 0 },
-  image: String,
-  dietary: [{ type: String }], // 'Vegetarian', 'Vegan', 'Gluten-Free', 'Spicy', 'Halal'
-  isAvailable: { type: Boolean, default: true },
-  isFeatured: { type: Boolean, default: false }
-}, { timestamps: true });
-
-foodSchema.index({ restaurant: 1, isAvailable: 1 });
-foodSchema.index({ category: 1 });
-foodSchema.index({ name: 'text', description: 'text' });
-
-export const Food = model('Food', foodSchema);
-export default Food;
-
+module.exports = mongoose.model('Food', foodSchema);

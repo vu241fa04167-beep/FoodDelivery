@@ -1,29 +1,60 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-const { Schema, model } = mongoose;
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Name is required'],
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: [true, 'Password is required'],
+      minlength: 6,
+    },
+    phone: {
+      type: String,
+      trim: true,
+    },
+    address: {
+      type: String,
+      default: '',
+    },
+    role: {
+      type: String,
+      enum: ['customer', 'admin'],
+      default: 'customer',
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  { timestamps: true }
+);
 
-export const addressSchema = new Schema({
-  label: { type: String, default: 'Home' }, // 'Home', 'Work', 'Other'
-  line1: { type: String, required: true },
-  line2: String,
-  city: { type: String, required: true },
-  state: String,
-  postalCode: String,
-  phone: String,
-  isDefault: { type: Boolean, default: false }
-}, { _id: true });
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
 
-const userSchema = new Schema({
-  name: { type: String, required: true, trim: true },
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password: { type: String },
-  googleId: String,
-  role: { type: String, enum: ['customer', 'restaurant', 'admin'], default: 'customer' },
-  phone: { type: String, trim: true },
-  addresses: [addressSchema],
-  favorites: [{ type: Schema.Types.ObjectId, ref: 'Restaurant' }]
-}, { timestamps: true });
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
-export const User = model('User', userSchema);
-export default User;
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
 
+module.exports = mongoose.model('User', userSchema);

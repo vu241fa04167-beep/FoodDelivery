@@ -1,49 +1,81 @@
-import mongoose from 'mongoose';
-import { addressSchema } from './User.js';
+const mongoose = require('mongoose');
 
-const { Schema, model } = mongoose;
-
-const orderSchema = new Schema({
-  customer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  restaurant: { type: Schema.Types.ObjectId, ref: 'Restaurant', required: true },
-  items: [{
-    food: { type: Schema.Types.ObjectId, ref: 'Food' },
-    name: String,
-    price: Number,
-    quantity: Number,
-    notes: String
-  }],
-  deliveryAddress: addressSchema,
-  deliveryInstructions: String,
-  paymentMethod: { type: String, enum: ['cod', 'online'], required: true },
-  paymentStatus: { type: String, enum: ['pending', 'paid'], default: 'pending' },
-  status: {
-    type: String,
-    enum: ['placed', 'accepted', 'preparing', 'out_for_delivery', 'delivered', 'cancelled', 'rejected'],
-    default: 'placed'
+const orderItemSchema = new mongoose.Schema({
+  food: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Food',
+    required: true,
   },
-  subtotal: { type: Number, required: true },
-  deliveryFee: { type: Number, default: 2.5 },
-  tip: { type: Number, default: 0, min: 0 },
-  deliverySpeed: { type: String, enum: ['standard', 'priority'], default: 'standard' },
-  priorityFee: { type: Number, default: 0 },
-  discount: { type: Number, default: 0 },
-  couponCode: String,
-  total: { type: Number, required: true },
-  idempotencyKey: { type: String, index: true, sparse: true },
-  cancelReason: String,
-  cancelledBy: { type: String, enum: ['customer', 'restaurant', 'admin'] },
-  statusHistory: [{
-    status: String,
-    timestamp: { type: Date, default: Date.now },
-    note: String
-  }]
-}, { timestamps: true });
+  name: String,
+  price: Number,
+  quantity: {
+    type: Number,
+    default: 1,
+    min: 1,
+  },
+  image: String,
+});
 
-orderSchema.index({ customer: 1, createdAt: -1 });
-orderSchema.index({ restaurant: 1, createdAt: -1 });
-orderSchema.index({ status: 1, createdAt: -1 });
+const orderSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    items: [orderItemSchema],
+    subtotal: {
+      type: Number,
+      required: true,
+    },
+    deliveryFee: {
+      type: Number,
+      default: 3.99,
+    },
+    tax: {
+      type: Number,
+      default: 0,
+    },
+    total: {
+      type: Number,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'],
+      default: 'pending',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed', 'refunded'],
+      default: 'pending',
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['cash', 'card', 'upi'],
+      default: 'cash',
+    },
+    stripePaymentIntentId: String,
+    customerName: {
+      type: String,
+      required: true,
+    },
+    customerPhone: {
+      type: String,
+      required: true,
+    },
+    customerAddress: {
+      type: String,
+      required: true,
+    },
+    deliveryInstructions: {
+      type: String,
+      default: '',
+    },
+    estimatedDelivery: {
+      type: Date,
+    },
+  },
+  { timestamps: true }
+);
 
-export const Order = model('Order', orderSchema);
-export default Order;
-
+module.exports = mongoose.model('Order', orderSchema);

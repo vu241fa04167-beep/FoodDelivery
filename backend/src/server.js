@@ -1,79 +1,96 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
-import express from 'express';
-import cors from 'cors';
-import morgan from 'morgan';
-import fs from 'fs';
-import http from 'http';
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const dotenv = require('dotenv');
+const path = require('path');
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
-dotenv.config(); // fallback
+dotenv.config();
 
-import { connectDB } from './config/db.js';
-import routes from './routes/index.js';
-import { errorHandler } from './middleware/errorMiddleware.js';
-
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET must be set in .env');
-}
+// Import routes
+const foodRoutes = require('./routes/food');
+const orderRoutes = require('./routes/order');
+const userRoutes = require('./routes/user');
+const categoryRoutes = require('./routes/category');
+const paymentRoutes = require('./routes/payment');
 
 const app = express();
-const port = process.env.PORT || 5000;
-const origins = (process.env.CLIENT_URL || 'http://localhost:5173')
-  .split(',')
-  .map(x => x.trim());
 
+// Security & performance middleware
+app.use(helmet());
+app.use(compression());
+app.use(morgan('dev'));
 app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || origins.includes(origin) || origin.startsWith('http://localhost:')) {
-      return cb(null, true);
-    }
-    cb(null, true); // Dev-friendly permissive
-  },
+  origin: process.env.CLIENT_URL || '*',
   credentials: true
 }));
 
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true, limit: '2mb' }));
-app.use(morgan('dev'));
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'savor-backend', timestamp: new Date() }));
-app.use('/api', routes);
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-app.use((req, res) => res.status(404).json({ message: `Route ${req.method} ${req.url} not found` }));
-app.use(errorHandler);
+// Serve static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const socketPath = '/tmp/savor.sock';
-
-connectDB().then(() => {
-  // 1. TCP Server for standard browser access
-  const tcpServer = app.listen(port, () => {
-    console.log(`🚀 Savor API running on http://localhost:${port}`);
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'FoodExpress API v2.0 is running',
+    timestamp: new Date().toISOString(),
+    version: '2.0.0'
   });
-  tcpServer.on('error', (err) => {
-    console.warn(`TCP listen on port ${port} warning:`, err.message);
-  });
-
-  // 2. Unix Domain Socket server for fast sandboxed access
-  try {
-    if (fs.existsSync(socketPath)) {
-      fs.unlinkSync(socketPath);
-    }
-    const sockServer = http.createServer(app);
-    sockServer.listen(socketPath, () => {
-      console.log(`🔌 Savor Socket API listening on ${socketPath}`);
-      try {
-        fs.chmodSync(socketPath, '0777');
-      } catch (e) {}
-    });
-  } catch (err) {
-    console.warn('Socket server creation warning:', err.message);
-  }
-}).catch(err => {
-  console.error('Fatal: Database connection failed:', err.message);
-  process.exit(1);
 });
 
-export default app;
+// API Routes
+app.use('/api/foods', foodRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/payments', paymentRoutes);
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ success: false, message: 'Route not found' });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    success: false, 
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+});
+
+// Connect to MongoDB and start server
+const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/foodexpress_v2';
+
+mongoose
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('✅ MongoDB connected successfully');
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('❌ MongoDB connection error:', err.message);
+    process.exit(1);
+  });
+
+module.exports = app;
