@@ -72,7 +72,9 @@ const seedDatabase = async () => {
     ]);
 
     console.log('Seeding restaurants and menu items...');
-    const restaurantsToSeed = sampleRestaurants;
+    // QuickBite is a single-restaurant ordering platform. Keep the catalog
+    // focused on Meghana Foods instead of exposing unrelated demo venues.
+    const restaurantsToSeed = sampleRestaurants.filter(({ name }) => name === 'Meghana Foods');
     for (let i = 0; i < restaurantsToSeed.length; i++) {
       const restData = restaurantsToSeed[i];
       const dishes = restData.name === 'Meghana Foods' ? meghanaMenu : restData.dishes;
