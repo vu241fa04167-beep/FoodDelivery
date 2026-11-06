@@ -63,20 +63,6 @@ export default function Restaurant({ restaurantId }) {
 
   return (
     <div className="bg-[#fffaf5]/90 min-h-screen pb-24 md:pb-12">
-      {/* Header */}
-      <div className="bg-white/95 border-b border-orange-100 py-5 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{restaurant.name}</h1>
-            <p className="text-xs text-gray-500 mt-0.5">{restaurant.cuisine} • {restaurant.area}</p>
-          </div>
-          <div className="flex items-center gap-3 text-xs font-semibold">
-            <span className="bg-green-700 text-white px-2 py-1 rounded">★ {restaurant.rating || 4.2}</span>
-            <span className="text-gray-700">{restaurant.deliveryTime}</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Container */}
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
         {/* Left Sticky Category Strip */}

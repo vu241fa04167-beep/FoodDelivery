@@ -55,7 +55,7 @@ export default function Home() {
     <main className="home-page">
       <section className="home-hero">
         <div className="home-hero-copy">
-          <span className="eyebrow">MEGHANA FOODS · BENGALURU</span>
+          <span className="eyebrow">QUICKBITE · BENGALURU</span>
           <h1>Real biryani.<br /><span>Made for your table.</span></h1>
           <p>Fresh Andhra flavours, comforting classics, and quick delivery from one trusted kitchen.</p>
           <div className="hero-actions"><Link to="/menu" className="primary-button">Browse full menu</Link><span className="hero-meta">★ {restaurant.rating || '4.4'} · {restaurant.deliveryTime || '25–35 mins'}</span></div>
